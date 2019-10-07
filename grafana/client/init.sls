@@ -1,12 +1,13 @@
 {%- from "grafana/map.jinja" import client with context %}
 {%- if client.get('enabled', False) %}
 
+{%- set state_version = client.get('state_version', 4) %}
 {%- set datasources = [] %}
 {%- for datasource_name, datasource in client.datasource.iteritems() %}
 
 {%- do datasources.append(datasource.type) %}
 grafana_client_datasource_{{ datasource_name }}:
-  grafana3_datasource.present:
+  grafana{{ state_version }}_datasource.present:
   - name: {{ datasource.name|default(datasource_name) }}
   - type: {{ datasource.type }}
   {%- if datasource.port is defined %}
@@ -84,7 +85,7 @@ grafana_client_datasource_{{ datasource_name }}:
 {%- if dashboard.datasource is not defined or dashboard.datasource in datasources %}
   {%- if dashboard.get('enabled', True) %}
 grafana_client_dashboard_{{ dashboard_name }}:
-  grafana3_dashboard.present:
+  grafana{{ state_version }}_dashboard.present:
   - name: {{ dashboard_name }}
     {%- if dashboard.get('format', 'yaml')|lower == 'json' %}
     {%- import dashboard.template as dashboard_template with context %}
@@ -105,7 +106,7 @@ grafana_client_dashboard_{{ dashboard_name }}:
     {%- endif %}
   {%- else %}
 grafana_client_dashboard_{{ dashboard_name }}:
-  grafana3_dashboard.absent:
+  grafana{{ state_version }}_dashboard.absent:
   - name: {{ dashboard_name }}
   {%- endif %}
 {%- endif %}
